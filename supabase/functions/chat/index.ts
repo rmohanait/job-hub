@@ -15,38 +15,46 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Extract user's auth token and fetch their applications
     const authHeader = req.headers.get("authorization") ?? "";
     let appContext = "";
 
     if (authHeader) {
-      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-      const supabaseKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
-      const supabase = createClient(supabaseUrl, supabaseKey, {
-        global: { headers: { Authorization: authHeader } },
-      });
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      const supabaseAnonKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: apps } = await supabase
-          .from("applications")
-          .select("company, role, status, date_applied, tags, notes, job_link")
-          .order("date_applied", { ascending: false })
-          .limit(100);
+      if (supabaseUrl && supabaseAnonKey) {
+        try {
+          const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+            global: { headers: { Authorization: authHeader } },
+          });
 
-        if (apps && apps.length > 0) {
-          const summary = apps.map((a) =>
-            `- ${a.company} | ${a.role} | ${a.status} | Applied: ${a.date_applied}${a.tags?.length ? ` | Tags: ${a.tags.join(", ")}` : ""}${a.notes ? ` | Notes: ${a.notes}` : ""}`
-          ).join("\n");
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: apps } = await supabase
+              .from("applications")
+              .select("company, role, status, date_applied, tags, notes, job_link")
+              .order("date_applied", { ascending: false })
+              .limit(100);
 
-          const statusCounts: Record<string, number> = {};
-          apps.forEach((a) => { statusCounts[a.status] = (statusCounts[a.status] || 0) + 1; });
-          const statsLine = Object.entries(statusCounts).map(([s, c]) => `${s}: ${c}`).join(", ");
+            if (apps && apps.length > 0) {
+              const summary = apps.map((a: any) =>
+                `- ${a.company} | ${a.role} | ${a.status} | Applied: ${a.date_applied}${a.tags?.length ? ` | Tags: ${a.tags.join(", ")}` : ""}${a.notes ? ` | Notes: ${a.notes}` : ""}`
+              ).join("\n");
 
-          appContext = `\n\nThe user has ${apps.length} job applications tracked:\nStatus breakdown: ${statsLine}\n\nFull list:\n${summary}`;
-        } else {
-          appContext = "\n\nThe user has no job applications tracked yet.";
+              const statusCounts: Record<string, number> = {};
+              apps.forEach((a: any) => { statusCounts[a.status] = (statusCounts[a.status] || 0) + 1; });
+              const statsLine = Object.entries(statusCounts).map(([s, c]) => `${s}: ${c}`).join(", ");
+
+              appContext = `\n\nThe user has ${apps.length} job applications tracked:\nStatus breakdown: ${statsLine}\n\nFull list:\n${summary}`;
+            } else {
+              appContext = "\n\nThe user has no job applications tracked yet.";
+            }
+          }
+        } catch (dbErr) {
+          console.error("Error fetching user apps:", dbErr);
         }
+      } else {
+        console.error("Missing Supabase env vars, skipping DB context");
       }
     }
 
