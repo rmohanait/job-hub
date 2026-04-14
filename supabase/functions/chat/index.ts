@@ -51,7 +51,7 @@ serve(async (req) => {
           appContext = "\n\nThe user has no job applications tracked yet.";
         }
       }
-    }
+      }
 
     const systemPrompt = `You are JobTracker Assistant, a helpful AI that answers questions about the user's job applications, job searching, interview preparation, resume writing, salary negotiation, and career advice. Keep answers clear, practical, and concise. Use markdown formatting when helpful.
 
