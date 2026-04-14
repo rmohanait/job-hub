@@ -25,7 +25,7 @@ serve(async (req) => {
       if (!supabaseUrl || !supabaseAnonKey) {
         console.error("Missing Supabase env vars, skipping DB context");
       } else {
-      const supabase = createClient(supabaseUrl, supabaseKey, {
+      const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         global: { headers: { Authorization: authHeader } },
       });
 
