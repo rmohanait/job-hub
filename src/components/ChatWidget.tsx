@@ -13,6 +13,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
 async function streamChat({
   messages,
+  accessToken,
   onDelta,
   onDone,
   onError,
@@ -93,8 +94,12 @@ const ChatWidget = () => {
       });
     };
 
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
     await streamChat({
       messages: [...messages, userMsg],
+      accessToken: token,
       onDelta: upsert,
       onDone: () => setLoading(false),
       onError: (msg) => {
