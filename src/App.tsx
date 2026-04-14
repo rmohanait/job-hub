@@ -11,6 +11,7 @@ import Signup from "./pages/Signup";
 import AuthCallback from "./pages/AuthCallback";
 import AddApplication from "./pages/AddApplication";
 import MyApplications from "./pages/MyApplications";
+import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/add" element={<ProtectedRoute><AddApplication /></ProtectedRoute>} />
             <Route path="/applications" element={<ProtectedRoute><MyApplications /></ProtectedRoute>} />
+            <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
