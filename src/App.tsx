@@ -3,18 +3,23 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ChatWidget from "@/components/ChatWidget";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AuthCallback from "./pages/AuthCallback";
 import AddApplication from "./pages/AddApplication";
 import MyApplications from "./pages/MyApplications";
-import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const AuthenticatedChatWidget = () => {
+  const { user } = useAuth();
+  return user ? <ChatWidget /> : null;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -30,9 +35,9 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/add" element={<ProtectedRoute><AddApplication /></ProtectedRoute>} />
             <Route path="/applications" element={<ProtectedRoute><MyApplications /></ProtectedRoute>} />
-            <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <AuthenticatedChatWidget />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
