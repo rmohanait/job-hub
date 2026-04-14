@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Briefcase, LayoutDashboard, PlusCircle, List, MessageCircle, LogOut, Menu, X } from "lucide-react";
+import { Briefcase, LayoutDashboard, PlusCircle, List, LogOut, Menu, X } from "lucide-react";
 
 const AppHeader = () => {
   const { signOut } = useAuth();
@@ -13,7 +13,6 @@ const AppHeader = () => {
     { to: "/", label: "Dashboard", icon: LayoutDashboard },
     { to: "/add", label: "Add Application", icon: PlusCircle },
     { to: "/applications", label: "My Applications", icon: List },
-    { to: "/chat", label: "Chat", icon: MessageCircle },
   ];
 
   const isActive = (path: string) => location.pathname === path;
