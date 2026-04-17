@@ -27,6 +27,12 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
   Rejected: "destructive",
 };
 
+const gbpFormat = new Intl.NumberFormat("en-GB", {
+  style: "currency",
+  currency: "GBP",
+  maximumFractionDigits: 0,
+});
+
 const MyApplications = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -45,6 +51,7 @@ const MyApplications = () => {
   const [editLink, setEditLink] = useState("");
   const [editNotes, setEditNotes] = useState("");
   const [editTags, setEditTags] = useState("");
+  const [editSalaryGbp, setEditSalaryGbp] = useState("");
 
   const { data: applications = [], isLoading } = useQuery({
     queryKey: ["applications", user?.id],
@@ -71,6 +78,15 @@ const MyApplications = () => {
     mutationFn: async () => {
       if (!editApp) return;
       const tags = editTags.split(",").map((t) => t.trim()).filter(Boolean);
+      const salaryTrim = editSalaryGbp.trim();
+      let salary_gbp: number | null = null;
+      if (salaryTrim) {
+        const n = Math.floor(Number(salaryTrim));
+        if (!Number.isFinite(n) || n < 0) {
+          throw new Error("Salary must be a non-negative whole number (GBP per year), or leave blank.");
+        }
+        salary_gbp = n;
+      }
       const { error } = await supabase.from("applications").update({
         company: editCompany,
         role: editRole,
@@ -79,6 +95,7 @@ const MyApplications = () => {
         job_link: editLink || null,
         notes: editNotes || null,
         tags: tags.length > 0 ? tags : null,
+        salary_gbp,
       }).eq("id", editApp.id);
       if (error) throw error;
     },
@@ -101,6 +118,7 @@ const MyApplications = () => {
     setEditLink(app.job_link ?? "");
     setEditNotes(app.notes ?? "");
     setEditTags(app.tags?.join(", ") ?? "");
+    setEditSalaryGbp(app.salary_gbp != null ? String(app.salary_gbp) : "");
   };
 
   const filtered = applications
@@ -160,6 +178,9 @@ const MyApplications = () => {
                 </CardHeader>
                 <CardContent className="flex-1 space-y-2">
                   <p className="text-xs text-muted-foreground">Applied: {new Date(app.date_applied).toLocaleDateString()}</p>
+                  {app.salary_gbp != null && (
+                    <p className="text-sm font-medium">{gbpFormat.format(app.salary_gbp)} <span className="text-xs font-normal text-muted-foreground">/ year</span></p>
+                  )}
                   {app.tags && app.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {app.tags.map((tag) => (
@@ -220,6 +241,17 @@ const MyApplications = () => {
               <div className="space-y-2">
                 <Label>Job Link</Label>
                 <Input type="url" value={editLink} onChange={(e) => setEditLink(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Salary (GBP / year, optional)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={editSalaryGbp}
+                  onChange={(e) => setEditSalaryGbp(e.target.value)}
+                  placeholder="e.g. 55000"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Notes</Label>

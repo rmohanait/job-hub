@@ -30,6 +30,7 @@ const AddApplication = () => {
   const [jobLink, setJobLink] = useState("");
   const [notes, setNotes] = useState("");
   const [tagsInput, setTagsInput] = useState("");
+  const [salaryGbpInput, setSalaryGbpInput] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const mutation = useMutation({
@@ -54,6 +55,16 @@ const AddApplication = () => {
         .map((t) => t.trim())
         .filter(Boolean);
 
+      const salaryTrim = salaryGbpInput.trim();
+      let salary_gbp: number | null = null;
+      if (salaryTrim) {
+        const n = Math.floor(Number(salaryTrim));
+        if (!Number.isFinite(n) || n < 0) {
+          throw new Error("Salary must be a non-negative whole number (GBP per year), or leave blank.");
+        }
+        salary_gbp = n;
+      }
+
       const { error } = await supabase.from("applications").insert({
         user_id: user!.id,
         company,
@@ -64,6 +75,7 @@ const AddApplication = () => {
         notes: notes || null,
         tags: tags.length > 0 ? tags : null,
         image_url: imageUrl,
+        salary_gbp,
       });
 
       if (error) throw error;
@@ -121,6 +133,19 @@ const AddApplication = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="salaryGbp">Salary (GBP / year, optional)</Label>
+                <Input
+                  id="salaryGbp"
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={salaryGbpInput}
+                  onChange={(e) => setSalaryGbpInput(e.target.value)}
+                  placeholder="e.g. 55000"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Interview prep notes, contacts..." rows={3} />
               </div>
@@ -135,9 +160,20 @@ const AddApplication = () => {
                 <Input id="image" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
               </div>
 
-              <Button type="submit" className="w-full" disabled={mutation.isPending}>
-                {mutation.isPending ? "Adding..." : "Add Application"}
-              </Button>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  disabled={mutation.isPending}
+                  onClick={() => navigate("/applications")}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="w-full sm:w-auto sm:min-w-[160px]" disabled={mutation.isPending}>
+                  {mutation.isPending ? "Adding..." : "Add Application"}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>

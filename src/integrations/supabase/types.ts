@@ -24,6 +24,7 @@ export type Database = {
           job_link: string | null
           notes: string | null
           role: string
+          salary_gbp: number | null
           status: Database["public"]["Enums"]["application_status"]
           tags: string[] | null
           updated_at: string
@@ -38,6 +39,7 @@ export type Database = {
           job_link?: string | null
           notes?: string | null
           role: string
+          salary_gbp?: number | null
           status?: Database["public"]["Enums"]["application_status"]
           tags?: string[] | null
           updated_at?: string
@@ -52,6 +54,7 @@ export type Database = {
           job_link?: string | null
           notes?: string | null
           role?: string
+          salary_gbp?: number | null
           status?: Database["public"]["Enums"]["application_status"]
           tags?: string[] | null
           updated_at?: string

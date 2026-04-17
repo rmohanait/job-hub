@@ -5,8 +5,8 @@ A full-stack job application tracker built with React, TypeScript, and Lovable C
 ## ✨ Features
 
 - **Dashboard** – Overview cards (Total, Interviews, Offers) with a bar chart showing applications by status
-- **Add Applications** – Form with company, role, status, date, job link, notes, tags, and image upload
-- **My Applications** – Searchable card grid with status filter, date sort, and inline edit/delete
+- **Add Applications** – Form with company, role, status, date, job link, optional **salary (GBP per year)**, notes, tags, and image upload. Use **Cancel** to leave without saving (returns to My Applications); while “Adding…” is shown, the request is in progress—wait for it to finish or refresh if something goes wrong.
+- **My Applications** – Searchable card grid with status filter, date sort, optional salary shown on each card when set, and inline edit/delete
 - **AI Chat Assistant** – Floating chat widget powered by AI that can answer career questions and query your application data
 - **Authentication** – Email/password sign-up and login with email verification
 - **Mobile Responsive** – Fully responsive layout with mobile hamburger navigation
@@ -84,11 +84,14 @@ The following environment variables are configured automatically via Lovable Clo
 | status | enum | Applied / Interviewing / Offer / Rejected |
 | date_applied | date | Application date |
 | job_link | text | URL to job posting |
+| salary_gbp | integer (nullable) | Optional annual salary in whole UK pounds (£); null if not set |
 | notes | text | Free-form notes |
 | tags | text[] | Categorization tags |
 | image_url | text | Uploaded image URL |
 
 All data is protected by Row-Level Security — users can only access their own applications.
+
+Apply pending SQL migrations (e.g. `supabase db push`) so `salary_gbp` exists on your database before using the salary field in production.
 
 ## 🤖 AI Chat Assistant
 
@@ -97,6 +100,7 @@ The floating chat widget (bottom-right corner) connects to Lovable AI and can:
 - Answer career and interview questions
 - Query your tracked applications ("How many applications do I have?")
 - Provide resume and salary negotiation advice
+- See optional per-application **salary (GBP / year)** in its context when you have saved salaries on your applications
 
 ## 📝 License
 

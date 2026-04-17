@@ -32,13 +32,18 @@ serve(async (req) => {
           if (user) {
             const { data: apps } = await supabase
               .from("applications")
-              .select("company, role, status, date_applied, tags, notes, job_link")
+              .select("company, role, status, date_applied, tags, notes, job_link, salary_gbp")
               .order("date_applied", { ascending: false })
               .limit(100);
 
             if (apps && apps.length > 0) {
+              const gbp = new Intl.NumberFormat("en-GB", {
+                style: "currency",
+                currency: "GBP",
+                maximumFractionDigits: 0,
+              });
               const summary = apps.map((a: any) =>
-                `- ${a.company} | ${a.role} | ${a.status} | Applied: ${a.date_applied}${a.tags?.length ? ` | Tags: ${a.tags.join(", ")}` : ""}${a.notes ? ` | Notes: ${a.notes}` : ""}`
+                `- ${a.company} | ${a.role} | ${a.status} | Applied: ${a.date_applied}${a.salary_gbp != null ? ` | Salary: ${gbp.format(a.salary_gbp)} / year` : ""}${a.tags?.length ? ` | Tags: ${a.tags.join(", ")}` : ""}${a.notes ? ` | Notes: ${a.notes}` : ""}`
               ).join("\n");
 
               const statusCounts: Record<string, number> = {};
